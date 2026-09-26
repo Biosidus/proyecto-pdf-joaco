@@ -79,6 +79,9 @@ WinRAR o 7-Zip instalado no hay que hacer nada más. Los `.cbz` no lo necesitan.
 .venv\Scripts\python.exe app.py
 ```
 
+En Windows también podés hacer doble clic en `iniciar.bat`: levanta el servidor,
+espera a que responda y abre el navegador solo.
+
 Abrí <http://127.0.0.1:8000>, soltá el archivo y esperá. Al terminar tenés el
 botón de descarga, las miniaturas de las páginas enderezadas para revisarlas y el
 botón para darlas vuelta si quedaron boca abajo.
@@ -119,6 +122,7 @@ Todo se ajusta desde `.env` (copiá `.env.example`):
 
 ```
 app.py                 Servidor FastAPI y endpoints
+iniciar.bat            Levanta la app y abre el navegador (Windows)
 core/config.py         Configuración desde .env
 core/extract.py        CBR/CBZ/PDF -> imágenes de página en disco
 core/orientation.py    Decisión de qué páginas girar, por forma
