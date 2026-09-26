@@ -1,0 +1,15 @@
+.venv/
+__pycache__/
+*.pyc
+.env
+workdir/
+
+# Tomos de prueba y salidas: pesan cientos de MB
+*.cbr
+*.cbz
+*.rar
+*.zip
+*.pdf
+
+# Estado local de las herramientas de desarrollo
+.commandcode/

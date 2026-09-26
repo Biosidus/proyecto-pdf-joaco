@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Enderezador de páginas dobles · CBR a PDF</title>
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<div class="page">
+
+  <header class="head">
+    <div class="head__brand">
+      <svg class="mark" viewBox="0 0 24 24" aria-hidden="true">
+        <rect class="mark__sheet" x="3.5" y="3.5" width="11" height="15" rx="1.5"/>
+        <path class="mark__arrow" d="M14.5 9.5a5.2 5.2 0 1 1-1.4 3.3"/>
+        <path class="mark__arrow" d="M16.6 6.2v3.6h-3.6"/>
+      </svg>
+      <div>
+        <h1>Enderezador de páginas dobles</h1>
+        <p class="head__sub">Recibe un CBR, un CBZ o un PDF y devuelve un PDF con las dobles en horizontal</p>
+      </div>
+    </div>
+  </header>
+
+  <main class="panel" id="panel">
+
+    <section class="stage" id="stage-drop">
+      <div class="drop" id="drop">
+        <input class="visually-hidden" type="file" id="file"
+               accept=".cbr,.cbz,.rar,.zip,.pdf" aria-describedby="drop-hint">
+        <label class="drop__label" for="file">
+          <span class="drop__title">Arrastrá el tomo acá</span>
+          <span class="drop__hint" id="drop-hint">
+            o <span class="drop__action">elegí un archivo</span>
+          </span>
+          <span class="drop__formats">.cbr · .cbz · .rar · .zip · .pdf</span>
+        </label>
+      </div>
+      <p class="stage__note">La conversión arranca apenas sueltas el archivo. No usa ninguna API:
+        el ancho de cada página alcanza para saber cuál es doble, porque una doble desplegada
+        mide el doble de ancho que una simple. No hay claves ni límites de uso.</p>
+    </section>
+
+    <section class="stage" id="stage-work" hidden>
+      <div class="work">
+        <p class="work__file" id="work-file"></p>
+        <div class="meter" id="meter" role="progressbar" aria-valuemin="0" aria-valuemax="100"
+             aria-valuenow="0" aria-labelledby="work-phase">
+          <div class="meter__fill" id="meter-fill"></div>
+        </div>
+        <div class="work__row">
+          <p class="work__phase" id="work-phase">Preparando</p>
+          <p class="work__count" id="work-count"></p>
+        </div>
+      </div>
+    </section>
+
+    <section class="stage" id="stage-error" hidden>
+      <div class="alert">
+        <p class="alert__title">No se pudo convertir</p>
+        <p class="alert__body" id="error-body"></p>
+      </div>
+      <button class="btn btn--primary" id="retry" type="button">Elegir otro archivo</button>
+    </section>
+
+    <section class="stage" id="stage-done" hidden>
+      <p class="done__title" id="done-title">PDF listo</p>
+      <p class="done__body" id="done-body"></p>
+      <p class="hint" id="flip-hint" hidden>La forma dice cuál página es doble, pero no para qué
+        lado girarla. Mirá las miniaturas de abajo: si las dobles te quedan boca abajo, dalas vuelta.</p>
+      <div class="done__actions">
+        <a class="btn btn--primary" id="download" href="#" download>Descargar PDF</a>
+        <button class="btn btn--ghost" id="flip" type="button" hidden>Dar vuelta las dobles</button>
+        <button class="btn btn--ghost" id="again" type="button">Convertir otro tomo</button>
+      </div>
+    </section>
+
+  </main>
+
+  <section class="report" id="report" aria-labelledby="report-title" hidden>
+    <div class="report__head">
+      <h2 id="report-title">Páginas enderezadas</h2>
+      <div class="segmented" role="group" aria-label="Qué páginas mostrar">
+        <button type="button" class="seg is-on" data-view="changed">Enderezadas</button>
+        <button type="button" class="seg" data-view="all">Todas</button>
+      </div>
+    </div>
+    <div class="gallery" id="gallery"></div>
+    <p class="report__empty" id="report-empty" hidden></p>
+  </section>
+
+  <p class="visually-hidden" aria-live="polite" id="live"></p>
+</div>
+<script src="/app.js"></script>
+</body>
+</html>
