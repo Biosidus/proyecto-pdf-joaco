@@ -7,6 +7,7 @@ sólo se rehace el PDF.
 
 from __future__ import annotations
 
+import logging
 import shutil
 import threading
 import time
@@ -18,6 +19,8 @@ from core.builder import build_pdf
 from core.config import settings
 from core.extract import PageImage, extract_pages
 from core.orientation import Layout, detect_layout, giro_opuesto
+
+logger = logging.getLogger(__name__)
 
 PHASE_QUEUED = "en cola"
 PHASE_EXTRACTING = "extrayendo páginas"
@@ -123,6 +126,7 @@ class JobRegistry:
         with self._lock:
             self._jobs[job_id] = job
         self.purge()
+        logger.info("Trabajo %s recibido: %s", job.id, filename)
         self._executor.submit(run_job, job)
         return job
 
@@ -186,6 +190,7 @@ def run_job(job: Job) -> None:
         job.update(pages=pages)
         build(job)
     except Exception as exc:  # noqa: BLE001 - el error se informa en la interfaz
+        logger.exception("Falló el trabajo %s (%s)", job.id, job.filename)
         job.update(status="error", phase="error", error=str(exc), message=str(exc),
                    finished_at=time.time())
     finally:
@@ -197,6 +202,7 @@ def run_flip(job: Job) -> None:
         job.update(giro_dobles=giro_opuesto(job.giro_dobles))
         build(job)
     except Exception as exc:  # noqa: BLE001
+        logger.exception("Falló el giro del trabajo %s", job.id)
         job.update(status="error", phase="error", error=str(exc), message=str(exc),
                    finished_at=time.time())
 
@@ -226,6 +232,7 @@ def build(job: Job) -> None:
     job.update(report=report, status="done", phase=PHASE_DONE, message=mensaje,
                finished_at=time.time())
     job.bump(total, total)
+    logger.info("Trabajo %s listo: %s", job.id, mensaje)
 
 
 registry = JobRegistry()

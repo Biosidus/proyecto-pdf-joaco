@@ -6,11 +6,16 @@ cd /d "%~dp0"
 set "PY=%~dp0.venv\Scripts\python.exe"
 set "APP=%~dp0app.py"
 set "URL=http://127.0.0.1:8000"
+set "LOGDIR=%~dp0workdir\logs"
+set "LOG=%LOGDIR%\servidor.log"
+
+if not exist "%LOGDIR%" mkdir "%LOGDIR%"
 
 if not exist "%PY%" goto sin_venv
 
 rem El .venv puede existir pero apuntar a un Python que ya no está (o sin las dependencias).
-"%PY%" -c "import fastapi, uvicorn" >nul 2>&1
+rem El error va al registro, así queda algo para leer después.
+"%PY%" -c "import fastapi, uvicorn" >>"%LOG%" 2>&1
 if errorlevel 1 goto venv_roto
 
 rem Si ya está corriendo, sólo abro el navegador.
@@ -30,7 +35,11 @@ set /a intentos+=1
 if %intentos% lss 30 goto esperar
 
 echo.
-echo   El servidor no arrancó. Mirá la otra ventana para ver el detalle.
+echo   El servidor no arrancó. Últimas líneas del registro:
+echo.
+call :mostrar_log
+echo.
+echo   Registro completo: %LOG%
 echo.
 pause
 exit /b 1
@@ -39,10 +48,19 @@ exit /b 1
 start "" "%URL%"
 exit /b 0
 
+:mostrar_log
+if not exist "%LOG%" exit /b 0
+powershell -NoProfile -Command "Get-Content -LiteralPath '%LOG%' -Tail 20 -Encoding UTF8" 2>nul
+exit /b 0
+
 :venv_roto
 echo.
 echo   El entorno virtual (.venv) no sirve: apunta a un Python que ya no esta,
 echo   o le faltan las dependencias. Pasa si se reinstalo o movio Python.
+echo.
+echo   El detalle quedo en el registro:
+echo.
+call :mostrar_log
 echo.
 echo   Se arregla recreandolo desde esta carpeta:
 echo.

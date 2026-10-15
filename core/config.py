@@ -39,6 +39,7 @@ class Settings:
         self.workdir = BASE_DIR / "workdir"
         self.uploads_dir = self.workdir / "uploads"
         self.jobs_dir = self.workdir / "jobs"
+        self.logs_dir = self.workdir / "logs"
         self.static_dir = BASE_DIR / "static"
 
         # Para qué lado se giran las dobles guardadas acostadas: 90 o 270.
@@ -57,7 +58,7 @@ class Settings:
         return self.max_upload_mb * 1024 * 1024
 
     def ensure_dirs(self) -> None:
-        for directory in (self.uploads_dir, self.jobs_dir):
+        for directory in (self.uploads_dir, self.jobs_dir, self.logs_dir):
             directory.mkdir(parents=True, exist_ok=True)
 
 

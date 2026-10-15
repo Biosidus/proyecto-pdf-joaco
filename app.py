@@ -6,8 +6,10 @@ No usa ninguna API externa: la forma de las páginas alcanza para encontrarlas.
 
 from __future__ import annotations
 
+import logging
 import uuid
 from contextlib import asynccontextmanager
+from logging.handlers import RotatingFileHandler
 from pathlib import Path
 
 import uvicorn
@@ -24,8 +26,42 @@ ALLOWED_SUFFIXES = {".cbr", ".cbz", ".rar", ".zip", ".pdf"}
 MULTIPART_SLACK = 64 * 1024
 COPY_CHUNK = 1024 * 1024
 
+LOG_FORMAT = "%(asctime)s %(levelname)s %(name)s: %(message)s"
+LOG_MAX_BYTES = 5 * 1024 * 1024
+LOG_BACKUPS = 3
+
 HOST = "127.0.0.1"
 PORT = 8000
+
+logger = logging.getLogger("enderezador")
+
+
+def configurar_logs() -> None:
+    """Manda el registro a workdir/logs además de la consola.
+
+    Tiene que quedar en disco: si algo falla al arrancar, la ventana se cierra
+    y no queda nada para mirar después.
+    """
+    settings.ensure_dirs()
+    formato = logging.Formatter(LOG_FORMAT)
+
+    archivo = RotatingFileHandler(
+        settings.logs_dir / "servidor.log",
+        maxBytes=LOG_MAX_BYTES,
+        backupCount=LOG_BACKUPS,
+        encoding="utf-8",
+    )
+    archivo.setFormatter(formato)
+
+    consola = logging.StreamHandler()
+    consola.setFormatter(formato)
+
+    root = logging.getLogger()
+    root.setLevel(logging.INFO)
+    root.handlers[:] = [archivo, consola]
+
+
+configurar_logs()
 
 
 def mensaje_limite() -> str:
@@ -154,6 +190,13 @@ app.mount("/", StaticFiles(directory=settings.static_dir, html=True), name="stat
 
 if __name__ == "__main__":
     settings.ensure_dirs()
+    logger.info(
+        "Arrancando: dobles a %s°, subida máxima %s MB",
+        settings.giro_dobles,
+        settings.max_upload_mb,
+    )
     print(f"\n  Enderezador de páginas dobles listo en http://{HOST}:{PORT}")
-    print(f"  Las dobles se giran {settings.giro_dobles}° (se cambia con un botón)\n")
-    uvicorn.run(app, host=HOST, port=PORT)
+    print(f"  Las dobles se giran {settings.giro_dobles}° (se cambia con un botón)")
+    print(f"  Registro: {settings.logs_dir / 'servidor.log'}\n")
+    # log_config=None: sin esto uvicorn no deja que sus mensajes lleguen al archivo.
+    uvicorn.run(app, host=HOST, port=PORT, log_config=None)
